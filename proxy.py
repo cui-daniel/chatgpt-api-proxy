@@ -66,7 +66,13 @@ def is_port(port):
         return False
 
 def is_proxy(proxy):
-    _nodes = proxy.split(":")
+    _nodes = proxy.split("://")
+    if len(_nodes) != 2:
+        return False
+    _nodes[0] = _nodes[0].lower()
+    if not _nodes[0] == 'http' and not _nodes[0] == 'socks4' and not _nodes[0] == 'socks5':
+        return False
+    _nodes = _nodes[1].split(":")
     if len(_nodes) != 2:
         return False
     if not is_port(_nodes[1]):
@@ -85,10 +91,15 @@ def is_proxy(proxy):
 
 def main():
     if len(sys.argv) < 3 or not is_port(sys.argv[1]) or not is_proxy(sys.argv[2]):
-        print("Usage: python %s <port> <http proxy>")
+        print("Usage: python %s <port> <proxy>")
+        print("Simples:")
+        print("\tpython %s 1234 http://127.0.0.1:2345")
+        print("\tpython %s 1234 socks4://127.0.0.1:2345")
+        print("\tpython %s 1234 socks5://127.0.0.1:2345")
         return
     _server = HTTPServer(('', int(sys.argv[1])), ProxyHTTPRequestHandler)
-    print('Starting chatgpt proxy server on port %s...' % sys.argv[1])
+    print('Starting chatgpt api proxy server on 0.0.0.0:%s...' % sys.argv[1])
+    print('proxy server:%s...' % sys.argv[2])
     _server.serve_forever()
 
 if __name__ == "__main__":
